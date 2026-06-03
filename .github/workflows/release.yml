@@ -1,0 +1,18 @@
+name: Move videos to release
+on:
+  push:
+    paths:
+      - 'videos/**'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Upload videos to release
+        run: |
+          gh release create latest --title "Videos" --notes "auto" 2>/dev/null || true
+          for f in videos/*.mp4 videos/*.mkv videos/*.avi videos/*.mov; do
+            [ -f "$f" ] && gh release upload latest "$f" --clobber
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

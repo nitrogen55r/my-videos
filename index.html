@@ -1,1636 +1,390 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>আমার ভিডিও ভান্ডার</title>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --surface2: #1a1a24;
-      --border: #2a2a3a;
-      --accent: #e63946;
-      --accent2: #ff6b6b;
-      --gold: #ffd700;
-      --text: #e8e8f0;
-      --muted: #6b6b88;
-      --success: #2ecc71;
-      --danger: #e63946;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Hind Siliguri', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ===== NOISE TEXTURE ===== */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.4;
-    }
-
-    /* ===== HEADER ===== */
-    header {
-      padding: 32px 40px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: linear-gradient(180deg, rgba(230,57,70,0.08) 0%, transparent 100%);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(20px);
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo-icon {
-      width: 44px;
-      height: 44px;
-      background: var(--accent);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      box-shadow: 0 0 24px rgba(230,57,70,0.4);
-    }
-
-    .logo-text {
-      font-family: 'Space Mono', monospace;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-text span {
-      color: var(--accent);
-    }
-
-    .header-right {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 4px 16px rgba(230,57,70,0.35);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent2);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 24px rgba(230,57,70,0.5);
-    }
-
-    .btn-secondary {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .btn-danger {
-      background: rgba(230,57,70,0.15);
-      color: var(--accent);
-      border: 1px solid rgba(230,57,70,0.3);
-      padding: 7px 14px;
-      font-size: 13px;
-    }
-
-    .btn-danger:hover {
-      background: var(--accent);
-      color: white;
-    }
-
-    /* ===== LOGIN SCREEN ===== */
-    #loginScreen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      flex-direction: column;
-      gap: 32px;
-    }
-
-    .login-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 48px;
-      width: 400px;
-      max-width: 90vw;
-      text-align: center;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-      animation: fadeUp 0.5s ease;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .login-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-
-    .login-card h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-
-    .login-card p {
-      color: var(--muted);
-      margin-bottom: 28px;
-      font-size: 14px;
-    }
-
-    .input-group {
-      text-align: left;
-      margin-bottom: 16px;
-    }
-
-    .input-group label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .input-group input {
-      width: 100%;
-      padding: 12px 16px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 15px;
-      font-family: 'Hind Siliguri', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .input-group input:focus {
-      border-color: var(--accent);
-    }
-
-    .error-msg {
-      color: var(--accent);
-      font-size: 13px;
-      margin-top: -8px;
-      margin-bottom: 12px;
-      display: none;
-    }
-
-    /* ===== SETUP SCREEN ===== */
-    #setupScreen {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    .setup-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 48px;
-      width: 480px;
-      max-width: 90vw;
-      animation: fadeUp 0.5s ease;
-    }
-
-    .setup-card h2 {
-      font-size: 22px;
-      margin-bottom: 8px;
-    }
-
-    .setup-card > p {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 28px;
-      line-height: 1.6;
-    }
-
-    .step-badge {
-      display: inline-block;
-      background: rgba(230,57,70,0.15);
-      color: var(--accent);
-      border: 1px solid rgba(230,57,70,0.3);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      font-family: 'Space Mono', monospace;
-    }
-
-    .help-link {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--accent);
-      font-size: 13px;
-      text-decoration: none;
-      margin-top: 8px;
-    }
-
-    .help-link:hover { text-decoration: underline; }
-
-    /* ===== MAIN APP ===== */
-    #mainApp { display: none; }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px;
-    }
-
-    /* ===== STATS BAR ===== */
-    .stats-bar {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
-    }
-
-    .stat-card {
-      flex: 1;
-      min-width: 160px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .stat-icon {
-      font-size: 28px;
-    }
-
-    .stat-info {}
-    .stat-info .num {
-      font-size: 24px;
-      font-weight: 700;
-      font-family: 'Space Mono', monospace;
-      color: var(--accent);
-    }
-
-    .stat-info .label {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* ===== UPLOAD ZONE ===== */
-    .upload-section {
-      margin-bottom: 40px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .upload-zone {
-      border: 2px dashed var(--border);
-      border-radius: 16px;
-      padding: 48px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-      background: var(--surface);
-      position: relative;
-    }
-
-    .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--accent);
-      background: rgba(230,57,70,0.05);
-    }
-
-    .upload-zone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .upload-icon { font-size: 48px; margin-bottom: 12px; }
-    .upload-text { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
-    .upload-hint { font-size: 13px; color: var(--muted); }
-
-    /* ===== UPLOAD PROGRESS ===== */
-    .upload-progress-container {
-      margin-top: 16px;
-      display: none;
-    }
-
-    .progress-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 8px;
-    }
-
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .progress-bar-bg {
-      background: var(--surface2);
-      border-radius: 4px;
-      height: 6px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 4px;
-      transition: width 0.3s;
-      width: 0%;
-    }
-
-    /* ===== VIDEO GRID ===== */
-    .videos-section {}
-
-    .videos-controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .search-box {
-      flex: 1;
-      min-width: 200px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 16px;
-    }
-
-    .search-box input {
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-size: 15px;
-      font-family: 'Hind Siliguri', sans-serif;
-      flex: 1;
-    }
-
-    .search-box input::placeholder { color: var(--muted); }
-
-    .videos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .video-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      transition: all 0.3s;
-      animation: fadeUp 0.4s ease;
-    }
-
-    .video-card:hover {
-      border-color: rgba(230,57,70,0.4);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-    }
-
-    .video-thumb {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: var(--surface2);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .video-thumb video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .video-thumb .play-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.3);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .video-card:hover .play-overlay { opacity: 1; }
-
-    .play-btn-overlay {
-      width: 52px;
-      height: 52px;
-      background: rgba(230,57,70,0.9);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .play-btn-overlay:hover { transform: scale(1.1); }
-
-    .video-info {
-      padding: 16px;
-    }
-
-    .video-name {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .video-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .video-size {
-      background: var(--surface2);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-family: 'Space Mono', monospace;
-    }
-
-    .video-actions {
-      padding: 0 16px 16px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-play {
-      flex: 1;
-      padding: 8px;
-      background: rgba(230,57,70,0.15);
-      color: var(--accent);
-      border: 1px solid rgba(230,57,70,0.3);
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Hind Siliguri', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-
-    .btn-play:hover {
-      background: var(--accent);
-      color: white;
-    }
-
-    /* ===== VIDEO PLAYER MODAL ===== */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 500;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(8px);
-    }
-
-    .modal-overlay.active { display: flex; }
-
-    .player-modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 900px;
-      overflow: hidden;
-      animation: fadeUp 0.3s ease;
-    }
-
-    .player-header {
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .player-title {
-      font-size: 16px;
-      font-weight: 600;
-      flex: 1;
-      margin-right: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .close-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      transition: all 0.2s;
-    }
-
-    .close-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-
-    #modalVideo {
-      width: 100%;
-      display: block;
-      background: #000;
-    }
-
-    /* ===== EMPTY STATE ===== */
-    .empty-state {
-      text-align: center;
-      padding: 80px 40px;
-      color: var(--muted);
-    }
-
-    .empty-state .empty-icon { font-size: 64px; margin-bottom: 16px; }
-    .empty-state h3 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
-    .empty-state p { font-size: 14px; }
-
-    /* ===== TOAST ===== */
-    .toast-container {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 9998;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .toast {
-      padding: 14px 20px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      animation: slideIn 0.3s ease;
-      max-width: 320px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-
-    .toast.success {
-      background: rgba(46,204,113,0.15);
-      border: 1px solid rgba(46,204,113,0.4);
-      color: var(--success);
-    }
-
-    .toast.error {
-      background: rgba(230,57,70,0.15);
-      border: 1px solid rgba(230,57,70,0.4);
-      color: var(--accent);
-    }
-
-    .toast.info {
-      background: rgba(100,100,200,0.15);
-      border: 1px solid rgba(100,100,200,0.4);
-      color: #aaaaff;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    /* ===== LOADING SPINNER ===== */
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255,255,255,0.2);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: inline-block;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* ===== SETTINGS PANEL ===== */
-    .settings-drawer {
-      position: fixed;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 380px;
-      background: var(--surface);
-      border-left: 1px solid var(--border);
-      z-index: 400;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      padding: 32px;
-      overflow-y: auto;
-    }
-
-    .settings-drawer.open { transform: translateX(0); }
-
-    .settings-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
-    }
-
-    .settings-header h3 { font-size: 18px; }
-
-    .settings-section { margin-bottom: 28px; }
-    .settings-section h4 { font-size: 14px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-
-    .info-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-    }
-
-    .info-row .key { color: var(--muted); }
-    .info-row .val {
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      color: var(--accent);
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ===== DELETE CONFIRM ===== */
-    .confirm-modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      width: 360px;
-      max-width: 90vw;
-      text-align: center;
-      animation: fadeUp 0.3s ease;
-    }
-
-    .confirm-modal h3 { font-size: 20px; margin-bottom: 8px; }
-    .confirm-modal p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-
-    .confirm-actions { display: flex; gap: 12px; }
-    .confirm-actions .btn { flex: 1; justify-content: center; }
-
-    @media (max-width: 600px) {
-      header { padding: 16px 20px; }
-      .container { padding: 20px; }
-      .upload-zone { padding: 32px 20px; }
-      .logo-text { font-size: 15px; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MyTube</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--s1:#111118;--s2:#1a1a24;--bd:#2a2a3a;--ac:#e63946;--tx:#e8e8f0;--mu:#6b6b88;--ok:#2ecc71}
+body{background:var(--bg);color:var(--tx);font-family:'Hind Siliguri',sans-serif;min-height:100vh}
+.hidden{display:none!important}
+#loginWrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:100}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:40px;width:360px;max-width:92vw;text-align:center}
+.card h2{font-size:22px;margin-bottom:6px}
+.card p{color:var(--mu);font-size:13px;margin-bottom:24px}
+.inp{width:100%;padding:12px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;color:var(--tx);font-size:15px;font-family:inherit;outline:none;margin-bottom:12px}
+.inp:focus{border-color:var(--ac)}
+.btn{padding:11px 20px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;transition:all .2s}
+.btn-r{background:var(--ac);color:#fff;width:100%}
+.btn-g{background:var(--s2);color:var(--tx);border:1px solid var(--bd)}
+.btn-g:hover{border-color:var(--ac);color:var(--ac)}
+.err{color:var(--ac);font-size:13px;margin-bottom:10px}
+#setupWrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:99}
+#setupWrap .card{width:420px;text-align:left}
+#setupWrap .card h2{text-align:center}
+#setupWrap .card>p{text-align:center}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:5px;margin-top:12px}
+header{padding:18px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(10,10,15,.95);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:17px;font-weight:700}
+.logo-icon{width:38px;height:38px;background:var(--ac);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo span{color:var(--ac)}
+.hbtns{display:flex;gap:8px}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px}
+.stats{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.stat{flex:1;min-width:140px;background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:12px}
+.stat-n{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;color:var(--ac)}
+.stat-l{font-size:11px;color:var(--mu)}
+.sec-title{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bd)}
+.controls{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:9px 14px}
+.search input{background:none;border:none;outline:none;color:var(--tx);font-size:14px;font-family:inherit;flex:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.empty{text-align:center;padding:60px 20px;color:var(--mu);grid-column:1/-1}
+.empty .ei{font-size:54px;margin-bottom:12px}
+.empty h3{font-size:18px;color:var(--tx);margin-bottom:6px}
+.vcard{background:var(--s1);border:1px solid var(--bd);border-radius:13px;overflow:hidden;transition:all .25s;animation:fadeup .35s ease}
+.vcard:hover{border-color:rgba(230,57,70,.4);transform:translateY(-2px);box-shadow:0 10px 32px rgba(0,0,0,.4)}
+@keyframes fadeup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.vthumb{aspect-ratio:16/9;background:#0d0d14;position:relative;overflow:hidden;cursor:pointer}
+.vthumb img{width:100%;height:100%;object-fit:cover}
+.vthumb .noimg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--mu);position:absolute;top:0;left:0}
+.vthumb .overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.vcard:hover .overlay{opacity:1}
+.play-circle{width:48px;height:48px;background:rgba(230,57,70,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.vinfo{padding:13px 14px 8px}
+.vname{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.vmeta{font-size:11px;color:var(--mu);display:flex;justify-content:space-between}
+.vsize{background:var(--s2);padding:2px 7px;border-radius:4px;font-family:'Space Mono',monospace}
+.vacts{padding:0 14px 13px;display:flex;gap:7px}
+.btn-play{flex:1;padding:8px;background:rgba(230,57,70,.12);color:var(--ac);border:1px solid rgba(230,57,70,.25);border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .2s}
+.btn-play:hover{background:var(--ac);color:#fff}
+.btn-del{padding:8px 12px;background:var(--s2);color:var(--mu);border:1px solid var(--bd);border-radius:7px;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-del:hover{background:rgba(230,57,70,.15);color:var(--ac)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)}
+.mbox{background:var(--s1);border:1px solid var(--bd);border-radius:18px;width:100%;overflow:hidden;animation:fadeup .25s ease}
+.mhead{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
+.mhead h3{font-size:15px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:12px}
+.xbtn{width:32px;height:32px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;cursor:pointer;color:var(--tx);font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.xbtn:hover{background:var(--ac)}
+#playerModal .mbox{max-width:860px}
+video{width:100%;display:block;background:#000}
+#delModal .mbox{max-width:340px;text-align:center}
+#delModal .mbody{padding:28px 24px}
+#delModal .mbody .di{font-size:44px;margin-bottom:12px}
+#delModal .mbody h3{font-size:19px;margin-bottom:6px}
+#delModal .mbody p{color:var(--mu);font-size:13px;margin-bottom:20px}
+.macts{display:flex;gap:10px}
+.macts .btn{flex:1}
+.btn-danger{background:var(--ac);color:#fff}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:300px;background:var(--s1);border-left:1px solid var(--bd);z-index:150;transform:translateX(100%);transition:transform .3s;padding:24px;overflow-y:auto}
+.drawer.open{transform:translateX(0)}
+.dhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.dhead h3{font-size:17px}
+.dsec{margin-bottom:22px}
+.dsec h4{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.irow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.irow .k{color:var(--mu)}
+.irow .v{font-family:'Space Mono',monospace;font-size:11px;color:var(--ac)}
+#toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{padding:12px 16px;border-radius:9px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;animation:slideIn .3s ease;max-width:280px;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.toast.ok{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.35);color:var(--ok)}
+.toast.er{background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.35);color:var(--ac)}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
-<!-- ===== LOGIN SCREEN ===== -->
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="login-icon">🎬</div>
-    <h2>আমার ভিডিও ভান্ডার</h2>
-    <p>এটি আপনার personal video site। প্রবেশ করতে পাসওয়ার্ড দিন।</p>
-    <div class="input-group">
-      <label>পাসওয়ার্ড</label>
-      <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড লিখুন..." onkeydown="if(event.key==='Enter')doLogin()"/>
-    </div>
-    <p class="error-msg" id="loginError">❌ ভুল পাসওয়ার্ড!</p>
-    <button class="btn btn-primary" onclick="doLogin()" style="width:100%;justify-content:center;">
-      প্রবেশ করুন →
-    </button>
-  </div>
-  <p style="color:#333;font-size:12px;font-family:'Space Mono',monospace;">প্রথমবার? config.js এ পাসওয়ার্ড সেট করুন</p>
-</div>
-
-<!-- ===== SETUP SCREEN ===== -->
-<div id="setupScreen" style="display:none;position:fixed;inset:0;background:var(--bg);align-items:center;justify-content:center;z-index:999;">
-  <div class="setup-card">
-    <div class="step-badge">⚙️ FIRST TIME SETUP</div>
-    <h2>GitHub সংযোগ করুন</h2>
-    <p>ভিডিও সংরক্ষণের জন্য GitHub repository ও token দিতে হবে। এটি শুধু একবার করতে হবে।</p>
-
-    <div class="input-group">
-      <label>GitHub Username</label>
-      <input type="text" id="setupUsername" placeholder="আপনার GitHub username"/>
-    </div>
-    <div class="input-group">
-      <label>Repository Name</label>
-      <input type="text" id="setupRepo" placeholder="যেমন: my-videos"/>
-    </div>
-    <div class="input-group">
-      <label>GitHub Token (repo permission)</label>
-      <input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxx"/>
-      <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" class="help-link">
-        🔑 Token তৈরি করুন (repo scope দিন)
-      </a>
-    </div>
-    <div class="input-group">
-      <label>পাসওয়ার্ড (login এর জন্য)</label>
-      <input type="password" id="setupPassword" placeholder="নিজের পাসওয়ার্ড দিন"/>
-    </div>
-    <button class="btn btn-primary" onclick="saveSetup()" style="width:100%;justify-content:center;margin-top:8px;">
-      সংরক্ষণ করুন ✓
-    </button>
+<div id="loginWrap">
+  <div class="card">
+    <div style="font-size:44px;margin-bottom:12px">🎬</div>
+    <h2>MyTube</h2>
+    <p>আপনার personal video vault</p>
+    <input class="inp" type="password" id="lpw" placeholder="পাসওয়ার্ড দিন..." onkeydown="if(event.key==='Enter')login()"/>
+    <div class="err hidden" id="lerr">❌ ভুল পাসওয়ার্ড</div>
+    <button class="btn btn-r" onclick="login()">প্রবেশ করুন →</button>
   </div>
 </div>
 
-<!-- ===== MAIN APP ===== -->
-<div id="mainApp">
+<div id="setupWrap" class="hidden">
+  <div class="card">
+    <div style="font-size:36px;text-align:center;margin-bottom:8px">⚙️</div>
+    <h2>প্রথমবার Setup</h2>
+    <p style="margin-bottom:20px">GitHub তথ্য দিন</p>
+    <label>GitHub Username</label>
+    <input class="inp" id="su" placeholder="nitrogen55r"/>
+    <label>Repository Name</label>
+    <input class="inp" id="sr" placeholder="my-videos"/>
+    <label>GitHub Token (repo permission)</label>
+    <input class="inp" type="password" id="st" placeholder="ghp_..."/>
+    <label>আপনার Password</label>
+    <input class="inp" type="password" id="sp" placeholder="নিজের পাসওয়ার্ড"/>
+    <div style="margin-top:16px">
+      <button class="btn btn-r" onclick="saveSetup()">সংরক্ষণ করুন ✓</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
   <header>
     <div class="logo">
       <div class="logo-icon">▶</div>
-      <div class="logo-text">My<span>Tube</span></div>
+      My<span>Tube</span>
     </div>
-    <div class="header-right">
-      <button class="btn btn-secondary" onclick="openSettings()">⚙️ সেটিংস</button>
-      <button class="btn btn-secondary" onclick="doLogout()">🔒 বের হন</button>
+    <div class="hbtns">
+      <button class="btn btn-g" onclick="openSettings()">⚙️</button>
+      <button class="btn btn-g" onclick="logout()">🔒</button>
     </div>
   </header>
-
-  <div class="container">
-    <!-- Stats -->
-    <div class="stats-bar" id="statsBar">
-      <div class="stat-card">
-        <div class="stat-icon">🎬</div>
-        <div class="stat-info">
-          <div class="num" id="statCount">0</div>
-          <div class="label">মোট ভিডিও</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">💾</div>
-        <div class="stat-info">
-          <div class="num" id="statSize">0 MB</div>
-          <div class="label">মোট সাইজ</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">☁️</div>
-        <div class="stat-info">
-          <div class="num" id="statRepo">—</div>
-          <div class="label">Repository</div>
-        </div>
-      </div>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><span style="font-size:26px">🎬</span><div><div class="stat-n" id="sCount">0</div><div class="stat-l">ভিডিও</div></div></div>
+      <div class="stat"><span style="font-size:26px">💾</span><div><div class="stat-n" id="sSize">0MB</div><div class="stat-l">মোট সাইজ</div></div></div>
+      <div class="stat"><span style="font-size:26px">☁️</span><div><div class="stat-n" id="sRepo" style="font-size:13px">—</div><div class="stat-l">Repository</div></div></div>
     </div>
-
-    <!-- Upload -->
-    <div class="upload-section">
-      <div class="section-title">📤 ভিডিও আপলোড</div>
-      <div class="upload-zone" id="uploadZone">
-        <input type="file" accept="video/*" multiple onchange="handleFileSelect(event)" id="fileInput"/>
-        <div class="upload-icon">🎞️</div>
-        <div class="upload-text">এখানে ভিডিও টেনে আনুন বা ক্লিক করুন</div>
-        <div class="upload-hint">MP4, MKV, AVI, MOV — সব ধরনের ভিডিও চলবে</div>
-      </div>
-      <div class="upload-progress-container" id="progressContainer"></div>
+    <div class="sec-title">🎥 আমার ভিডিওসমূহ</div>
+    <div class="controls">
+      <div class="search"><span>🔍</span><input type="text" placeholder="ভিডিও খুঁজুন..." oninput="filterV(this.value)"/></div>
+      <button class="btn btn-g" onclick="loadVideos()">🔄</button>
     </div>
-
-    <!-- Thumbnail picker modal (shown per video before upload) -->
-    <div class="modal-overlay" id="thumbPickerModal">
-      <div class="player-modal" style="max-width:560px;">
-        <div class="player-header">
-          <div class="player-title" id="thumbPickerTitle">Thumbnail বেছে নিন</div>
-          <button class="close-btn" onclick="skipThumbnail()">✕</button>
-        </div>
-        <div style="padding:24px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-            <!-- Auto capture preview -->
-            <div>
-              <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">🎬 ভিডিও থেকে Auto</div>
-              <canvas id="thumbCanvas" style="width:100%;border-radius:10px;border:2px solid var(--border);cursor:pointer;aspect-ratio:16/9;object-fit:cover;" onclick="selectAutoThumb()"></canvas>
-              <div style="display:flex;gap:6px;margin-top:8px;">
-                <button class="btn btn-secondary" onclick="captureFrame(-5)" style="flex:1;padding:6px;font-size:12px;">◀ আগে</button>
-                <button class="btn btn-secondary" onclick="captureFrame(5)" style="flex:1;padding:6px;font-size:12px;">পরে ▶</button>
-              </div>
-              <div style="font-size:11px;color:var(--muted);margin-top:4px;text-align:center;" id="frameTime">0:00</div>
-            </div>
-            <!-- Custom image upload -->
-            <div>
-              <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">🖼️ নিজের ছবি দিন</div>
-              <label style="display:block;cursor:pointer;">
-                <input type="file" accept="image/*" onchange="loadCustomThumb(event)" style="display:none;" id="customThumbInput"/>
-                <div id="customThumbPreview" style="width:100%;aspect-ratio:16/9;border-radius:10px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:var(--surface2);transition:border-color 0.2s;">
-                  <span style="font-size:28px;">📷</span>
-                  <span style="font-size:12px;color:var(--muted);">ছবি বেছে নিন</span>
-                </div>
-              </label>
-            </div>
-          </div>
-          <!-- Selected indicator -->
-          <div id="thumbSelectedMsg" style="display:none;padding:10px 14px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:var(--success);font-size:13px;margin-bottom:16px;">
-            ✓ Thumbnail সিলেক্ট হয়েছে
-          </div>
-          <div style="display:flex;gap:10px;">
-            <button class="btn btn-secondary" onclick="skipThumbnail()" style="flex:1;justify-content:center;">বাদ দিন (No Thumb)</button>
-            <button class="btn btn-primary" onclick="confirmThumbnail()" style="flex:1;justify-content:center;">✓ Upload করুন</button>
-          </div>
-        </div>
-        <!-- Hidden video for frame capture -->
-        <video id="thumbVideo" style="display:none;" preload="metadata" crossorigin="anonymous"></video>
-      </div>
+    <div class="grid" id="grid">
+      <div class="empty"><div class="ei">⏳</div><h3>লোড হচ্ছে...</h3></div>
     </div>
+  </div>
+</div>
 
-    <!-- Videos -->
-    <div class="videos-section">
-      <div class="section-title">🎥 আমার ভিডিওসমূহ</div>
-      <div class="videos-controls">
-        <div class="search-box">
-          <span>🔍</span>
-          <input type="text" placeholder="ভিডিও খুঁজুন..." oninput="filterVideos(this.value)" id="searchInput"/>
-        </div>
-        <button class="btn btn-secondary" onclick="loadVideos()">🔄 রিফ্রেশ</button>
-      </div>
-      <div class="videos-grid" id="videosGrid">
-        <div class="empty-state" style="grid-column:1/-1;">
-          <div class="empty-icon">⏳</div>
-          <h3>লোড হচ্ছে...</h3>
-        </div>
+<div class="modal hidden" id="playerModal">
+  <div class="mbox" style="max-width:860px">
+    <div class="mhead"><h3 id="pTitle">ভিডিও</h3><button class="xbtn" onclick="closePlayer()">✕</button></div>
+    <video id="pVideo" controls></video>
+  </div>
+</div>
+
+<div class="modal hidden" id="delModal">
+  <div class="mbox" style="max-width:340px;text-align:center">
+    <div class="mbody">
+      <div class="di">🗑️</div>
+      <h3>মুছবেন?</h3>
+      <p id="delName" style="color:var(--ac);margin-bottom:4px;font-size:14px"></p>
+      <p style="color:var(--mu);font-size:13px;margin-bottom:20px">স্থায়ীভাবে মুছে যাবে</p>
+      <div class="macts">
+        <button class="btn btn-g" onclick="closeDelModal()">বাতিল</button>
+        <button class="btn btn-danger" id="delBtn" onclick="doDelete()">মুছুন</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== VIDEO PLAYER MODAL ===== -->
-<div class="modal-overlay" id="playerModal">
-  <div class="player-modal">
-    <div class="player-header">
-      <div class="player-title" id="modalTitle">ভিডিও</div>
-      <button class="close-btn" onclick="closePlayer()">✕</button>
-    </div>
-    <video id="modalVideo" controls controlsList="nodownload"></video>
-  </div>
-</div>
-
-<!-- ===== DELETE CONFIRM MODAL ===== -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="confirm-modal">
-    <div style="font-size:48px;margin-bottom:16px;">🗑️</div>
-    <h3>ভিডিও মুছবেন?</h3>
-    <p id="deleteVideoName" style="color:var(--accent);margin-bottom:8px;"></p>
-    <p>এই ভিডিওটি স্থায়ীভাবে মুছে যাবে। ফিরিয়ে আনা যাবে না।</p>
-    <div class="confirm-actions" style="margin-top:24px;">
-      <button class="btn btn-secondary" onclick="closeDeleteModal()">বাতিল</button>
-      <button class="btn btn-primary" id="confirmDeleteBtn" onclick="confirmDelete()" style="background:var(--danger);">হ্যাঁ, মুছুন</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== SETTINGS DRAWER ===== -->
-<div class="settings-drawer" id="settingsDrawer">
-  <div class="settings-header">
-    <h3>⚙️ সেটিংস</h3>
-    <button class="close-btn" onclick="closeSettings()">✕</button>
-  </div>
-  <div class="settings-section">
+<div class="drawer" id="drawer">
+  <div class="dhead"><h3>⚙️ সেটিংস</h3><button class="xbtn" onclick="closeSettings()">✕</button></div>
+  <div class="dsec">
     <h4>GitHub তথ্য</h4>
-    <div class="info-row">
-      <span class="key">Username</span>
-      <span class="val" id="settingUsername">—</span>
-    </div>
-    <div class="info-row">
-      <span class="key">Repository</span>
-      <span class="val" id="settingRepo">—</span>
-    </div>
-    <div class="info-row">
-      <span class="key">Branch</span>
-      <span class="val">main</span>
-    </div>
+    <div class="irow"><span class="k">Username</span><span class="v" id="dUser">—</span></div>
+    <div class="irow"><span class="k">Repository</span><span class="v" id="dRepo">—</span></div>
   </div>
-  <div class="settings-section">
-    <h4>পাসওয়ার্ড পরিবর্তন</h4>
-    <div class="input-group">
-      <label>নতুন পাসওয়ার্ড</label>
-      <input type="password" id="newPassword" placeholder="নতুন পাসওয়ার্ড..."/>
-    </div>
-    <button class="btn btn-secondary" onclick="changePassword()" style="width:100%;justify-content:center;">পরিবর্তন করুন</button>
-  </div>
-  <div class="settings-section">
+  <div class="dsec">
     <h4>Token আপডেট</h4>
-    <div class="input-group">
-      <label>নতুন GitHub Token</label>
-      <input type="password" id="newToken" placeholder="ghp_xxxx..."/>
-    </div>
-    <button class="btn btn-secondary" onclick="updateToken()" style="width:100%;justify-content:center;">Token আপডেট</button>
+    <input class="inp" type="password" id="newTk" placeholder="ghp_নতুন token..."/>
+    <button class="btn btn-g" style="width:100%;margin-top:8px" onclick="updateToken()">আপডেট করুন</button>
   </div>
-  <div class="settings-section">
-    <button class="btn btn-danger" onclick="clearAllData()" style="width:100%;justify-content:center;">🗑️ সব সেটিংস মুছুন</button>
+  <div class="dsec">
+    <h4>পাসওয়ার্ড পরিবর্তন</h4>
+    <input class="inp" type="password" id="newPw" placeholder="নতুন পাসওয়ার্ড..."/>
+    <button class="btn btn-g" style="width:100%;margin-top:8px" onclick="changePw()">পরিবর্তন করুন</button>
+  </div>
+  <div class="dsec">
+    <button class="btn" style="width:100%;background:rgba(230,57,70,.12);color:var(--ac);border:1px solid rgba(230,57,70,.25)" onclick="resetAll()">🗑️ Reset</button>
   </div>
 </div>
 
-<!-- ===== TOAST CONTAINER ===== -->
-<div class="toast-container" id="toastContainer"></div>
+<div id="toasts"></div>
 
 <script>
-// ============================================================
-//  CONFIG & STATE
-// ============================================================
-const CONFIG_KEY = 'mytube_config';
-let cfg = null;
-let allVideos = [];
-let deleteTarget = null;
+const KEY='mytube_v3';
+let cfg=null,videos=[],delTarget=null;
 
-// ============================================================
-//  INIT
-// ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem(CONFIG_KEY);
-  if (!saved) {
-    showSetup();
-  } else {
-    cfg = JSON.parse(saved);
-    showLogin();
+window.onload=()=>{
+  const s=localStorage.getItem(KEY);
+  if(!s){show('setupWrap');return;}
+  cfg=JSON.parse(s);
+  show('loginWrap');
+  setTimeout(()=>document.getElementById('lpw').focus(),100);
+};
+
+function show(id){
+  ['loginWrap','setupWrap','app'].forEach(i=>{
+    document.getElementById(i).classList.toggle('hidden',i!==id);
+  });
+}
+
+function login(){
+  const pw=document.getElementById('lpw').value;
+  if(pw===cfg.password){
+    document.getElementById('lpw').value='';
+    document.getElementById('lerr').classList.add('hidden');
+    show('app');
+    document.getElementById('sRepo').textContent=cfg.repo;
+    document.getElementById('dUser').textContent=cfg.username;
+    document.getElementById('dRepo').textContent=cfg.repo;
+    loadVideos();
+  }else{
+    document.getElementById('lerr').classList.remove('hidden');
+    document.getElementById('lpw').value='';
   }
-});
-
-function showSetup() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('setupScreen').style.display = 'flex';
 }
 
-function showLogin() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('setupScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'none';
-  setTimeout(() => document.getElementById('loginPassword').focus(), 100);
-}
+function logout(){show('loginWrap');}
 
-function showApp() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('setupScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-  document.getElementById('statRepo').textContent = cfg.repo;
-  document.getElementById('settingUsername').textContent = cfg.username;
-  document.getElementById('settingRepo').textContent = cfg.repo;
+function saveSetup(){
+  const u=document.getElementById('su').value.trim();
+  const r=document.getElementById('sr').value.trim();
+  const t=document.getElementById('st').value.trim();
+  const p=document.getElementById('sp').value.trim();
+  if(!u||!r||!t||!p){toast('সব তথ্য পূরণ করুন','er');return;}
+  cfg={username:u,repo:r,token:t,password:p};
+  localStorage.setItem(KEY,JSON.stringify(cfg));
+  show('app');
+  document.getElementById('sRepo').textContent=r;
+  document.getElementById('dUser').textContent=u;
+  document.getElementById('dRepo').textContent=r;
   loadVideos();
 }
 
-// ============================================================
-//  SETUP
-// ============================================================
-function saveSetup() {
-  const username = document.getElementById('setupUsername').value.trim();
-  const repo = document.getElementById('setupRepo').value.trim();
-  const token = document.getElementById('setupToken').value.trim();
-  const password = document.getElementById('setupPassword').value.trim();
+function gh(path,opts={}){
+  return fetch(`https://api.github.com/repos/${cfg.username}/${cfg.repo}/${path}`,{
+    headers:{
+      'Authorization':'Bearer '+cfg.token,
+      'Accept':'application/vnd.github.v3+json',
+      'Content-Type':'application/json',
+      ...(opts.headers||{})
+    },...opts
+  });
+}
 
-  if (!username || !repo || !token || !password) {
-    showToast('সব তথ্য পূরণ করুন!', 'error');
+async function loadVideos(){
+  const g=document.getElementById('grid');
+  g.innerHTML='<div class="empty"><div class="ei">⏳</div><h3>লোড হচ্ছে...</h3></div>';
+  try{
+    const r=await gh('contents/videos');
+    if(r.status===404){videos=[];renderV([]);return;}
+    if(!r.ok){const e=await r.json();throw new Error(e.message||'Error '+r.status);}
+    const data=await r.json();
+    videos=Array.isArray(data)?data.filter(f=>f.type==='file'&&/\.(mp4|mkv|avi|mov|webm|flv|wmv|m4v|3gp)$/i.test(f.name)):[];
+    renderV(videos);
+    document.getElementById('sCount').textContent=videos.length;
+    document.getElementById('sSize').textContent=fmtSize(videos.reduce((s,v)=>s+(v.size||0),0));
+  }catch(e){
+    g.innerHTML=`<div class="empty"><div class="ei">❌</div><h3>লোড ব্যর্থ</h3><p style="font-size:13px;margin-top:8px">${e.message}</p></div>`;
+  }
+}
+
+function renderV(list){
+  const g=document.getElementById('grid');
+  if(!list.length){
+    g.innerHTML='<div class="empty"><div class="ei">🎬</div><h3>কোনো ভিডিও নেই</h3><p>Termux দিয়ে upload করুন</p></div>';
     return;
   }
-
-  cfg = { username, repo, token, password };
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-  showToast('সেটআপ সম্পন্ন! ✓', 'success');
-  showApp();
-}
-
-// ============================================================
-//  AUTH
-// ============================================================
-function doLogin() {
-  const pw = document.getElementById('loginPassword').value;
-  if (!cfg) return;
-  if (pw === cfg.password) {
-    document.getElementById('loginError').style.display = 'none';
-    document.getElementById('loginPassword').value = '';
-    showApp();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('loginPassword').focus();
-  }
-}
-
-function doLogout() {
-  document.getElementById('loginPassword').value = '';
-  showLogin();
-}
-
-// ============================================================
-//  GITHUB API
-// ============================================================
-const ghAPI = (path, opts = {}) => fetch(
-  `https://api.github.com/repos/${cfg.username}/${cfg.repo}/${path}`,
-  {
-    headers: {
-      'Authorization': `Bearer ${cfg.token}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-      ...(opts.headers || {})
-    },
-    ...opts
-  }
-);
-
-async function loadVideos() {
-  const grid = document.getElementById('videosGrid');
-  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">⏳</div><h3>লোড হচ্ছে...</h3></div>`;
-
-  try {
-    const res = await ghAPI('contents/videos');
-    if (!res.ok) {
-      if (res.status === 404) {
-        // folder doesn't exist yet
-        allVideos = [];
-        renderVideos([]);
-        return;
-      }
-      throw new Error(`GitHub API error: ${res.status}`);
-    }
-    const files = await res.json();
-    allVideos = files.filter(f => f.type === 'file' && isVideo(f.name));
-    renderVideos(allVideos);
-    updateStats();
-  } catch(e) {
-    console.error(e);
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">❌</div><h3>লোড করতে পারিনি</h3><p>${e.message}</p></div>`;
-  }
-}
-
-function isVideo(name) {
-  return /\.(mp4|mkv|avi|mov|webm|flv|wmv|m4v|3gp)$/i.test(name);
-}
-
-function renderVideos(videos) {
-  const grid = document.getElementById('videosGrid');
-  if (!videos.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-      <div class="empty-icon">🎬</div>
-      <h3>কোনো ভিডিও নেই</h3>
-      <p>উপরের বক্সে ভিডিও আপলোড করুন</p>
-    </div>`;
-    return;
-  }
-
-  grid.innerHTML = videos.map(v => {
-    const size = formatSize(v.size);
-    const url = v.download_url;
-    const baseName = v.name.replace(/\.[^.]+$/, '');
-    // Thumbnail URL: thumbnails/videoname.jpg on GitHub raw
-    const thumbUrl = `https://raw.githubusercontent.com/${cfg.username}/${cfg.repo}/main/thumbnails/${encodeURIComponent(baseName)}.jpg`;
-    return `
-    <div class="video-card">
-      <div class="video-thumb" style="background:#111;">
-        <img
-          src="${thumbUrl}"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-          onload="this.style.display='block';this.nextElementSibling.style.display='none';"
-          style="width:100%;height:100%;object-fit:cover;display:block;"
-          alt="thumbnail"/>
-        <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:40px;color:var(--muted);">🎬</div>
-        <div class="play-overlay">
-          <div class="play-btn-overlay" onclick="openPlayer('${url}','${escHtml(v.name)}')">▶</div>
-        </div>
-        <!-- Change thumb button -->
-        <button onclick="openChangeThumb('${escHtml(baseName)}','${url}')" style="position:absolute;bottom:8px;right:8px;padding:4px 10px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:6px;font-size:11px;cursor:pointer;">🖼️ থাম্বনেইল</button>
+  g.innerHTML=list.map(v=>{
+    const base=v.name.replace(/\.[^.]+$/,'');
+    const thumb=`https://raw.githubusercontent.com/${cfg.username}/${cfg.repo}/main/thumbnails/${encodeURIComponent(base)}.jpg`;
+    const url=v.download_url;
+    return `<div class="vcard">
+      <div class="vthumb" onclick="openPlayer('${url}','${esc(v.name)}')">
+        <img src="${thumb}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'" />
+        <div class="noimg">🎬</div>
+        <div class="overlay"><div class="play-circle">▶</div></div>
       </div>
-      <div class="video-info">
-        <div class="video-name" title="${escHtml(v.name)}">${escHtml(v.name)}</div>
-        <div class="video-meta">
-          <span>📅 GitHub</span>
-          <span class="video-size">${size}</span>
-        </div>
+      <div class="vinfo">
+        <div class="vname" title="${esc(v.name)}">${esc(v.name)}</div>
+        <div class="vmeta"><span>GitHub</span><span class="vsize">${fmtSize(v.size)}</span></div>
       </div>
-      <div class="video-actions">
-        <button class="btn-play" onclick="openPlayer('${url}','${escHtml(v.name)}')">▶ প্লে করুন</button>
-        <button class="btn btn-danger" onclick="askDelete('${escHtml(v.name)}','${escHtml(v.sha)}')">🗑️</button>
+      <div class="vacts">
+        <button class="btn-play" onclick="openPlayer('${url}','${esc(v.name)}')">▶ প্লে</button>
+        <button class="btn-del" onclick="askDel('${esc(v.name)}','${esc(v.sha)}')">🗑️</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function filterVideos(q) {
-  const filtered = q ? allVideos.filter(v => v.name.toLowerCase().includes(q.toLowerCase())) : allVideos;
-  renderVideos(filtered);
+function filterV(q){renderV(q?videos.filter(v=>v.name.toLowerCase().includes(q.toLowerCase())):videos);}
+
+function openPlayer(url,name){
+  document.getElementById('pTitle').textContent=name;
+  document.getElementById('pVideo').src=url;
+  document.getElementById('playerModal').classList.remove('hidden');
 }
-
-function updateStats() {
-  document.getElementById('statCount').textContent = allVideos.length;
-  const totalBytes = allVideos.reduce((s, v) => s + (v.size || 0), 0);
-  document.getElementById('statSize').textContent = formatSize(totalBytes);
+function closePlayer(){
+  const v=document.getElementById('pVideo');
+  v.pause();v.src='';
+  document.getElementById('playerModal').classList.add('hidden');
 }
+document.getElementById('playerModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePlayer();});
 
-// ============================================================
-//  UPLOAD
-// ============================================================
-const uploadZone = document.getElementById('uploadZone');
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag-over');
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('video/'));
-  if (files.length) handleFileSelect({ target: { files, value: '' } });
-});
-
-// Thumbnail picker state
-let thumbQueue = [];
-let thumbQueueIdx = 0;
-let selectedThumbBase64 = null; // null = no thumb, string = base64 jpeg
-
-function handleFileSelect(e) {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
-  e.target.value = '';
-  thumbQueue = files;
-  thumbQueueIdx = 0;
-  selectedThumbBase64 = null;
-  openThumbPicker();
+function askDel(name,sha){
+  delTarget={name,sha};
+  document.getElementById('delName').textContent=name;
+  document.getElementById('delModal').classList.remove('hidden');
 }
-
-// ---- Thumbnail Picker ----
-function openThumbPicker() {
-  if (thumbQueueIdx >= thumbQueue.length) {
-    // All done — start actual uploads
-    document.getElementById('thumbPickerModal').classList.remove('active');
-    doUploadQueue();
-    return;
-  }
-  const file = thumbQueue[thumbQueueIdx];
-  document.getElementById('thumbPickerTitle').textContent = `Thumbnail: ${file.name}`;
-  selectedThumbBase64 = null;
-  document.getElementById('thumbSelectedMsg').style.display = 'none';
-  document.getElementById('customThumbPreview').innerHTML = `<span style="font-size:28px;">📷</span><span style="font-size:12px;color:var(--muted);">ছবি বেছে নিন</span>`;
-
-  // Load video for frame capture
-  const vid = document.getElementById('thumbVideo');
-  vid.src = URL.createObjectURL(file);
-  vid.addEventListener('loadedmetadata', () => {
-    vid.currentTime = Math.min(1, vid.duration * 0.1);
-  }, { once: true });
-  vid.addEventListener('seeked', () => { drawFrame(); }, { once: false });
-
-  document.getElementById('thumbPickerModal').classList.add('active');
+function closeDelModal(){
+  document.getElementById('delModal').classList.add('hidden');
+  delTarget=null;
 }
-
-function drawFrame() {
-  const vid = document.getElementById('thumbVideo');
-  const canvas = document.getElementById('thumbCanvas');
-  canvas.width = 640; canvas.height = 360;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(vid, 0, 0, 640, 360);
-  const t = vid.currentTime;
-  const m = Math.floor(t/60), s = Math.floor(t%60);
-  document.getElementById('frameTime').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-}
-
-function captureFrame(delta) {
-  const vid = document.getElementById('thumbVideo');
-  vid.currentTime = Math.max(0, Math.min(vid.duration, vid.currentTime + delta));
-}
-
-function selectAutoThumb() {
-  const canvas = document.getElementById('thumbCanvas');
-  selectedThumbBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-  document.getElementById('thumbSelectedMsg').style.display = 'block';
-  showToast('Auto thumbnail সিলেক্ট হয়েছে ✓', 'success');
-}
-
-function loadCustomThumb(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const b64 = ev.target.result;
-    selectedThumbBase64 = b64.split(',')[1];
-    document.getElementById('customThumbPreview').innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"/>`;
-    document.getElementById('thumbSelectedMsg').style.display = 'block';
-    showToast('কাস্টম thumbnail সিলেক্ট হয়েছে ✓', 'success');
-  };
-  reader.readAsDataURL(file);
-}
-
-function confirmThumbnail() {
-  // If auto frame selected but user didn't click canvas — auto-capture current frame
-  if (!selectedThumbBase64) {
-    selectAutoThumb();
-  }
-  thumbQueueIdx++;
-  openThumbPicker();
-}
-
-function skipThumbnail() {
-  selectedThumbBase64 = null;
-  thumbQueue[thumbQueueIdx]._skipThumb = true;
-  thumbQueueIdx++;
-  openThumbPicker();
-}
-
-// Store thumb decisions per file
-let thumbDecisions = {}; // filename -> base64 or null
-
-async function doUploadQueue() {
-  // Re-build decisions from queue (each file processed in order)
-  // We'll use a simple approach: re-open picker collecting decisions
-  // Actually decisions are set by selectedThumbBase64 at confirm time
-  // Simpler: store decisions during picker flow
-  const container = document.getElementById('progressContainer');
-  container.style.display = 'block';
-  for (let i = 0; i < thumbQueue.length; i++) {
-    await uploadSingleFile(thumbQueue[i], container, thumbDecisions[thumbQueue[i].name] || null);
-  }
-  thumbDecisions = {};
-  setTimeout(() => {
-    container.style.display = 'none';
-    container.innerHTML = '';
+async function doDelete(){
+  if(!delTarget)return;
+  const btn=document.getElementById('delBtn');
+  btn.innerHTML='<span class="spin"></span>';
+  btn.disabled=true;
+  try{
+    const r=await gh(`contents/videos/${encodeURIComponent(delTarget.name)}`,{
+      method:'DELETE',
+      body:JSON.stringify({message:'Delete: '+delTarget.name,sha:delTarget.sha})
+    });
+    if(!r.ok){const e=await r.json();throw new Error(e.message);}
+    toast('"'+delTarget.name+'" মুছে গেছে','ok');
+    closeDelModal();
     loadVideos();
-  }, 1500);
+  }catch(e){toast('মুছতে পারিনি: '+e.message,'er');}
+  finally{btn.innerHTML='মুছুন';btn.disabled=false;}
 }
 
-// Revised picker to store decisions properly
-let _thumbResolve = null;
-const _perFileThumb = {};
-
-function handleFileSelect2(files) {
-  thumbQueue = files;
-  _perFileThumb = {};
-  processNextInQueue(0);
+function openSettings(){document.getElementById('drawer').classList.add('open');}
+function closeSettings(){document.getElementById('drawer').classList.remove('open');}
+function updateToken(){
+  const t=document.getElementById('newTk').value.trim();
+  if(!t){toast('Token দিন','er');return;}
+  cfg.token=t;
+  localStorage.setItem(KEY,JSON.stringify(cfg));
+  document.getElementById('newTk').value='';
+  toast('Token আপডেট হয়েছে ✓','ok');
 }
-
-// Actually let's use the simplest correct approach:
-// Store thumb per-file during queue processing
-function openThumbPickerForFile(file, resolve) {
-  _thumbResolve = resolve;
-  document.getElementById('thumbPickerTitle').textContent = `Thumbnail: ${file.name}`;
-  selectedThumbBase64 = null;
-  document.getElementById('thumbSelectedMsg').style.display = 'none';
-  document.getElementById('customThumbPreview').innerHTML = `<span style="font-size:28px;">📷</span><span style="font-size:12px;color:var(--muted);">ছবি বেছে নিন</span>`;
-
-  const vid = document.getElementById('thumbVideo');
-  vid.src = URL.createObjectURL(file);
-  vid.addEventListener('loadedmetadata', () => { vid.currentTime = Math.min(1, vid.duration*0.1); }, {once:true});
-
-  document.getElementById('thumbPickerModal').classList.add('active');
+function changePw(){
+  const p=document.getElementById('newPw').value.trim();
+  if(!p){toast('পাসওয়ার্ড দিন','er');return;}
+  cfg.password=p;
+  localStorage.setItem(KEY,JSON.stringify(cfg));
+  document.getElementById('newPw').value='';
+  toast('পাসওয়ার্ড পরিবর্তন হয়েছে ✓','ok');
 }
+function resetAll(){if(confirm('সব মুছবেন?')){localStorage.removeItem(KEY);location.reload();}}
 
-// Override confirmThumbnail and skipThumbnail to use promise
-function confirmThumbnail() {
-  if (!selectedThumbBase64) selectAutoThumb();
-  const val = selectedThumbBase64;
-  selectedThumbBase64 = null;
-  document.getElementById('thumbPickerModal').classList.remove('active');
-  if (_thumbResolve) { _thumbResolve(val); _thumbResolve = null; }
+function fmtSize(b){
+  if(!b)return '?';
+  if(b<1024)return b+'B';
+  if(b<1048576)return (b/1024).toFixed(1)+'KB';
+  return (b/1048576).toFixed(1)+'MB';
 }
-
-function skipThumbnail() {
-  selectedThumbBase64 = null;
-  document.getElementById('thumbPickerModal').classList.remove('active');
-  if (_thumbResolve) { _thumbResolve(null); _thumbResolve = null; }
-}
-
-// Override handleFileSelect to use promise-based picker
-async function handleFileSelect(e) {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
-  if (e.target.value !== undefined) e.target.value = '';
-
-  const container = document.getElementById('progressContainer');
-  container.style.display = 'block';
-
-  for (const file of files) {
-    const thumbB64 = await new Promise(res => openThumbPickerForFile(file, res));
-    await uploadSingleFile(file, container, thumbB64);
-  }
-
-  setTimeout(() => {
-    container.style.display = 'none';
-    container.innerHTML = '';
-    loadVideos();
-  }, 1500);
-}
-
-async function uploadSingleFile(file, container, thumbBase64 = null) {
-  if (file.size > 25 * 1024 * 1024) {
-    showToast(`"${file.name}" অনেক বড় (সর্বোচ্চ 25MB)`, 'error');
-    return;
-  }
-
-  const itemId = 'prog_' + Date.now();
-  container.insertAdjacentHTML('beforeend', `
-    <div class="progress-item" id="${itemId}">
-      <div class="progress-header">
-        <span>📤 ${escHtml(file.name)}</span>
-        <span id="${itemId}_pct">এনকোড করছি...</span>
-      </div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="${itemId}_bar" style="width:10%"></div></div>
-    </div>
-  `);
-
-  try {
-    const base64 = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result.split(',')[1]);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
-
-    document.getElementById(`${itemId}_pct`).textContent = 'আপলোড হচ্ছে...';
-    document.getElementById(`${itemId}_bar`).style.width = '50%';
-
-    // Upload video
-    let sha = null;
-    const checkRes = await ghAPI(`contents/videos/${encodeURIComponent(file.name)}`);
-    if (checkRes.ok) { const ex = await checkRes.json(); sha = ex.sha; }
-
-    const res = await ghAPI(`contents/videos/${encodeURIComponent(file.name)}`, {
-      method: 'PUT',
-      body: JSON.stringify({ message: `Upload video: ${file.name}`, content: base64, ...(sha?{sha}:{}) })
-    });
-    if (!res.ok) { const err = await res.json(); throw new Error(err.message || 'Upload failed'); }
-
-    document.getElementById(`${itemId}_bar`).style.width = '75%';
-
-    // Upload thumbnail if provided
-    if (thumbBase64) {
-      const baseName = file.name.replace(/\.[^.]+$/, '');
-      const thumbPath = `thumbnails/${encodeURIComponent(baseName)}.jpg`;
-      document.getElementById(`${itemId}_pct`).textContent = 'Thumbnail আপলোড...';
-      let tSha = null;
-      const tCheck = await ghAPI(`contents/${thumbPath}`);
-      if (tCheck.ok) { const tex = await tCheck.json(); tSha = tex.sha; }
-      await ghAPI(`contents/${thumbPath}`, {
-        method: 'PUT',
-        body: JSON.stringify({ message: `Thumbnail: ${baseName}`, content: thumbBase64, ...(tSha?{sha:tSha}:{}) })
-      });
-    }
-
-    document.getElementById(`${itemId}_bar`).style.width = '100%';
-    document.getElementById(`${itemId}_pct`).textContent = '✓ সম্পন্ন!';
-    showToast(`"${file.name}" আপলোড হয়েছে!`, 'success');
-
-  } catch(e) {
-    document.getElementById(`${itemId}_pct`).textContent = '❌ ব্যর্থ';
-    document.getElementById(`${itemId}_bar`).style.background = 'var(--danger)';
-    showToast(`"${file.name}" আপলোড ব্যর্থ: ${e.message}`, 'error');
-  }
-}
-
-// ---- Change thumbnail for existing video ----
-function openChangeThumb(baseName, videoUrl) {
-  const fakeFile = { name: baseName + '.existing', _baseName: baseName };
-  const thumbB64Promise = new Promise(res => {
-    // Use picker with a blank video
-    _thumbResolve = res;
-    document.getElementById('thumbPickerTitle').textContent = `Thumbnail পরিবর্তন: ${baseName}`;
-    selectedThumbBase64 = null;
-    document.getElementById('thumbSelectedMsg').style.display = 'none';
-    document.getElementById('customThumbPreview').innerHTML = `<span style="font-size:28px;">📷</span><span style="font-size:12px;color:var(--muted);">ছবি বেছে নিন</span>`;
-    const vid = document.getElementById('thumbVideo');
-    vid.src = videoUrl;
-    vid.addEventListener('loadedmetadata', () => { vid.currentTime = Math.min(1, vid.duration*0.1); }, {once:true});
-    document.getElementById('thumbPickerModal').classList.add('active');
-  });
-  thumbB64Promise.then(async b64 => {
-    if (!b64) return;
-    const thumbPath = `thumbnails/${encodeURIComponent(baseName)}.jpg`;
-    let tSha = null;
-    const tCheck = await ghAPI(`contents/${thumbPath}`);
-    if (tCheck.ok) { const tex = await tCheck.json(); tSha = tex.sha; }
-    await ghAPI(`contents/${thumbPath}`, {
-      method: 'PUT',
-      body: JSON.stringify({ message: `Update thumbnail: ${baseName}`, content: b64, ...(tSha?{sha:tSha}:{}) })
-    });
-    showToast('Thumbnail আপডেট হয়েছে! (কিছুক্ষণ পর দেখা যাবে)', 'success');
-    setTimeout(loadVideos, 2000);
-  });
-}
-
-// ============================================================
-//  DELETE
-// ============================================================
-function askDelete(name, sha) {
-  deleteTarget = { name, sha };
-  document.getElementById('deleteVideoName').textContent = name;
-  document.getElementById('deleteModal').classList.add('active');
-}
-
-function closeDeleteModal() {
-  document.getElementById('deleteModal').classList.remove('active');
-  deleteTarget = null;
-}
-
-async function confirmDelete() {
-  if (!deleteTarget) return;
-  const btn = document.getElementById('confirmDeleteBtn');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-
-  try {
-    const res = await ghAPI(`contents/videos/${encodeURIComponent(deleteTarget.name)}`, {
-      method: 'DELETE',
-      body: JSON.stringify({
-        message: `Delete video: ${deleteTarget.name}`,
-        sha: deleteTarget.sha
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message);
-    }
-
-    // Also delete thumbnail if exists
-    try {
-      const baseName = deleteTarget.name.replace(/\.[^.]+$/, '');
-      const thumbPath = `contents/thumbnails/${encodeURIComponent(baseName)}.jpg`;
-      const tCheck = await ghAPI(thumbPath);
-      if (tCheck.ok) {
-        const tData = await tCheck.json();
-        await ghAPI(thumbPath, {
-          method: 'DELETE',
-          body: JSON.stringify({ message: `Delete thumbnail: ${baseName}`, sha: tData.sha })
-        });
-      }
-    } catch(_) {} // thumbnail delete failure is non-critical
-
-    showToast(`"${deleteTarget.name}" মুছে গেছে`, 'success');
-    closeDeleteModal();
-    loadVideos();
-  } catch(e) {
-    showToast(`মুছতে পারিনি: ${e.message}`, 'error');
-  } finally {
-    btn.innerHTML = 'হ্যাঁ, মুছুন';
-    btn.disabled = false;
-  }
-}
-
-// ============================================================
-//  PLAYER
-// ============================================================
-function openPlayer(url, name) {
-  document.getElementById('modalTitle').textContent = name;
-  document.getElementById('modalVideo').src = url;
-  document.getElementById('playerModal').classList.add('active');
-}
-
-function closePlayer() {
-  const v = document.getElementById('modalVideo');
-  v.pause();
-  v.src = '';
-  document.getElementById('playerModal').classList.remove('active');
-}
-
-document.getElementById('playerModal').addEventListener('click', function(e) {
-  if (e.target === this) closePlayer();
-});
-
-// ============================================================
-//  SETTINGS
-// ============================================================
-function openSettings() {
-  document.getElementById('settingsDrawer').classList.add('open');
-}
-
-function closeSettings() {
-  document.getElementById('settingsDrawer').classList.remove('open');
-}
-
-function changePassword() {
-  const pw = document.getElementById('newPassword').value.trim();
-  if (!pw) { showToast('পাসওয়ার্ড খালি রাখা যাবে না', 'error'); return; }
-  cfg.password = pw;
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-  document.getElementById('newPassword').value = '';
-  showToast('পাসওয়ার্ড পরিবর্তন হয়েছে ✓', 'success');
-}
-
-function updateToken() {
-  const tk = document.getElementById('newToken').value.trim();
-  if (!tk) { showToast('Token খালি রাখা যাবে না', 'error'); return; }
-  cfg.token = tk;
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-  document.getElementById('newToken').value = '';
-  showToast('Token আপডেট হয়েছে ✓', 'success');
-}
-
-function clearAllData() {
-  if (confirm('সত্যিই সব সেটিংস মুছবেন? পুনরায় setup করতে হবে।')) {
-    localStorage.removeItem(CONFIG_KEY);
-    location.reload();
-  }
-}
-
-// ============================================================
-//  HELPERS
-// ============================================================
-function formatSize(bytes) {
-  if (!bytes) return '?';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1024/1024).toFixed(1) + ' MB';
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function showToast(msg, type = 'info') {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<span>${type==='success'?'✓':type==='error'?'✕':'ℹ'}</span> ${msg}`;
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function toast(msg,type='ok'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML='<span>'+(type==='ok'?'✓':'✕')+'</span> '+msg;
   c.appendChild(t);
-  setTimeout(() => t.remove(), 4000);
+  setTimeout(()=>t.remove(),3500);
 }
 </script>
 </body>

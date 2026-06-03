@@ -7,13 +7,19 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Upload videos to release
         run: |
-          gh release create latest --title "Videos" --notes "auto" 2>/dev/null || true
+          gh release delete latest --yes 2>/dev/null || true
+          gh release create latest --title "Videos" --notes "auto"
           for f in videos/*.mp4 videos/*.mkv videos/*.avi videos/*.mov; do
-            [ -f "$f" ] && gh release upload latest "$f" --clobber
+            if [ -f "$f" ]; then
+              echo "Uploading $f..."
+              gh release upload latest "$f"
+            fi
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

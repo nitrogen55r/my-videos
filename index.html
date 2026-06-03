@@ -208,8 +208,6 @@ const KEY='mytube_v3';
 let cfg=null,videos=[],delTarget=null;
 
 window.onload=()=>{
-  const urlp=new URLSearchParams(window.location.search);
-  if(urlp.get("setup")){const parts=urlp.get("setup").split("|");if(parts.length===4){cfg={username:parts[0],repo:parts[1],token:parts[2],password:parts[3]};localStorage.setItem(KEY,JSON.stringify(cfg));window.location=window.location.pathname;return;}}
   const s=localStorage.getItem(KEY);
   if(!s){show('setupWrap');return;}
   cfg=JSON.parse(s);
